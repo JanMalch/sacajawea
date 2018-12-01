@@ -1,3 +1,90 @@
 <resources>
     <string name="app_name">Sacajawea</string>
+
+    <string name="pref_translate_language">pref_translate_language</string>
+    <string name="pref_listen_language">pref_listen_language</string>
+    <string name="pref_name">pref_name</string>
+    <string name="lbl_select_language">Select a language</string>
+    <string name="translate">Translate</string>
+    <string name="listen">Listen</string>
+    <string name="set_your_name">Set your name</string>
+    <string name="listening_status">Listening to <b>%1$s</b> translating to <b>%2$s</b>.</string>
+    <string name="start_translating">Start Translating</string>
+    <string name="translating_status">Translating to <b>%1$s</b> for <b>%2$d</b> listener(s).</string>
+    <string name="translating_setup">Setting up. Please wait …</string>
+    <string name="stop_listening">Stop Listening</string>
+    <string name="stop_translating">Stop Translating</string>
+    <string name="not_connected_to_wifi">You are not connected to a Wi-Fi network …</string>
+    <string name="preview">Preview</string>
+    <string name="scan_qr_code">Scan QR code</string>
+    <string name="service_registration_error">An error occurred during initial setup. Please wait or retry later.</string>
+
+
+
+    <string name="mandarin">Mandarin</string>
+    <string name="spanish">Spanish</string>
+    <string name="english">English</string>
+    <string name="simple_english">Simple English</string>
+    <string name="hindi">Hindi</string>
+    <string name="arabic">Arabic</string>
+    <string name="portuguese">Portuguese</string>
+    <string name="bengali">Bengali</string>
+    <string name="russian">Russian</string>
+    <string name="japanese">Japanese</string>
+    <string name="punjabi">Punjabi</string>
+    <string name="german">German</string>
+    <string name="javanese">Javanese</string>
+    <string name="wu">Wu</string>
+    <string name="malay">Malay</string>
+    <string name="telugu">Telugu</string>
+    <string name="vietnamese">Vietnamese</string>
+    <string name="korean">Korean</string>
+    <string name="french">French</string>
+    <string name="marathi">Marathi</string>
+    <string name="tamil">Tamil</string>
+    <string name="urdu">Urdu</string>
+    <string name="turkish">Turkish</string>
+    <string name="italian">Italian</string>
+    <string name="yue">Yue</string>
+    <string name="thai">Thai</string>
+    <string name="gujarati">Gujarati</string>
+    <string name="jin">Jin</string>
+    <string name="southern_min">Southern Min</string>
+    <string name="persian">Persian</string>
+    <string name="polish">Polish</string>
+    <string-array name="languages">
+        <item>@string/mandarin</item>
+        <item>@string/spanish</item>
+        <item>@string/english</item>
+        <item>@string/simple_english</item>
+        <item>@string/hindi</item>
+        <item>@string/arabic</item>
+        <item>@string/portuguese</item>
+        <item>@string/bengali</item>
+        <item>@string/russian</item>
+        <item>@string/japanese</item>
+        <item>@string/punjabi</item>
+        <item>@string/german</item>
+        <item>@string/javanese</item>
+        <item>@string/wu</item>
+        <item>@string/malay</item>
+        <item>@string/telugu</item>
+        <item>@string/vietnamese</item>
+        <item>@string/korean</item>
+        <item>@string/french</item>
+        <item>@string/marathi</item>
+        <item>@string/tamil</item>
+        <item>@string/urdu</item>
+        <item>@string/turkish</item>
+        <item>@string/italian</item>
+        <item>@string/yue</item>
+        <item>@string/thai</item>
+        <item>@string/gujarati</item>
+        <item>@string/jin</item>
+        <item>@string/southern_min</item>
+        <item>@string/persian</item>
+        <item>@string/polish</item>
+    </string-array>
+    <string name="title_activity_listening">ListeningActivity</string>
 </resources>
+

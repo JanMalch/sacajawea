@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".TranslatingActivity"
+
+        android:padding="24dp">
+
+    <!--android:background="@color/primary"-->
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/translating_status"
+            android:id="@+id/tv_translating_language"
+            android:textStyle="normal"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"/>
+
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"/>
+
+    <!--<TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="#fff"
+            android:textStyle="bold"
+            android:id="@+id/tv_translating_sound"
+            android:textSize="22sp"/>-->
+
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    <!--<Button
+            android:id="@+id/translating_update_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update status"
+            android:drawableLeft="@drawable/ic_mic_off_black_opaque_24dp"/>-->
+
+    <Button
+            android:id="@+id/stop_translating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/stop_translating"
+            android:drawableStart="@drawable/ic_mic_off_black_opaque_24dp"/>
+
+</LinearLayout>
