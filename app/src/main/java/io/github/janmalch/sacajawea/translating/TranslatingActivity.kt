@@ -1,21 +1,26 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.translating
 
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.wifi.p2p.WifiP2pDeviceList
-import android.net.wifi.p2p.WifiP2pInfo
 import android.net.wifi.p2p.WifiP2pManager
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import io.github.janmalch.sacajawea.listeners.Listener
-import io.github.janmalch.sacajawea.service.TranslateService
-import io.github.janmalch.sacajawea.udp.UdpAudioServer
+import io.github.janmalch.sacajawea.R
+import io.github.janmalch.sacajawea.TAG
+import io.github.janmalch.sacajawea.getPreferenceString
+import io.github.janmalch.sacajawea.listening.Listener
+import io.github.janmalch.sacajawea.media.AudioStream
+import io.github.janmalch.sacajawea.observable.ServerSubject
+import io.github.janmalch.sacajawea.udp.AudioSocket
+import io.github.janmalch.sacajawea.wifi.WiFiActivity
 import kotlinx.android.synthetic.main.activity_translating.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 class TranslatingActivity : WiFiActivity() {
 
@@ -26,10 +31,18 @@ class TranslatingActivity : WiFiActivity() {
         getPreferenceString(R.string.pref_name)
     }
 
-    private val udpAudioServer = UdpAudioServer()
+    // private val volume = VolumeStream { tv_translating_sound.text = it }
+
     private val listeners = mutableMapOf<String, Listener>() // Listeners()
     private val REQUEST_MICROPHONE = 100
 
+    private val threads = Executors.newCachedThreadPool()
+    private val shutdown = CountDownLatch(1)
+
+    // private val volume = VolumeStreamRunnable(shutdown)
+
+    private lateinit var audioStream: AudioStream
+    private lateinit var server: ServerSubject
     private lateinit var service: TranslateService
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,10 +50,28 @@ class TranslatingActivity : WiFiActivity() {
         setContentView(R.layout.activity_translating)
         stop_translating.setOnClickListener { stopTranslating() }
 
-        udpAudioServer.newClients.subscribe { listeners[it.id] = it }
-        udpAudioServer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        audioStream = AudioStream(shutdown)
+        threads.submit(audioStream)
 
-        service = TranslateService(currentName, currentLanguage, udpAudioServer.port, mManager, mChannel)
+        // volume.progress.subscribe { tv_translating_sound.text = it }
+        // threads.submit(volume)
+
+        server = ServerSubject()
+        server.subscribe {
+            val client = AudioSocket(it.client.inetAddress, server.port, audioStream)
+            listeners[it.listener.id] = it.listener
+            requestGroupInfo()
+            threads.submit(client)
+        }
+        threads.submit(server)
+
+        service = TranslateService(
+            currentName,
+            currentLanguage,
+            server.port,
+            mManager,
+            mChannel
+        )
 
         service.registerService(object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
@@ -52,12 +83,12 @@ class TranslatingActivity : WiFiActivity() {
             }
         })
 
-
         checkPermissions()
         setupRecording()
     }
 
     private fun setupRecording() {
+        // volume.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
         // TODO: AudioStream into UdpServer
         // Log.i(TAG, "setup recording ...")
         // recorder.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
@@ -110,7 +141,10 @@ class TranslatingActivity : WiFiActivity() {
     }
 
     private fun stopTranslating() {
-        udpAudioServer.cancel(true)
+        shutdown.countDown()
+        server.complete()
+        // audioStream.close()
+        // udpAudioServer.cancel(true)
         service.unregisterService()
         mManager.removeGroup(mChannel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
@@ -121,12 +155,12 @@ class TranslatingActivity : WiFiActivity() {
                 Log.i(TAG, "removeGroup::onFailure")
             }
         })
+        threads.shutdown()
         finish()
     }
 
     override fun onBackPressed() {
         stopTranslating()
-        // finish()
     }
 
     private fun checkPermissions() {
@@ -175,7 +209,7 @@ class TranslatingActivity : WiFiActivity() {
 
 
     private fun updateStatus(error: Int, currentListeners: Int = 0) {
-        if (error < 0 && udpAudioServer.running) {
+        if (error < 0 && server.running) {
             tv_translating_language.text = getString(
                 R.string.translating_status,
                 currentLanguage,
@@ -184,6 +218,8 @@ class TranslatingActivity : WiFiActivity() {
         } else {
             tv_translating_language.text = getString(R.string.service_registration_error)
         }
+
+        tv_translating_clients.text = listeners.values.joinToString("\n", "- ")
     }
 
     /** register the BroadcastReceiver with the intent values to be matched  */

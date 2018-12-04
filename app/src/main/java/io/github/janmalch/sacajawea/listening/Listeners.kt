@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea.listeners
+package io.github.janmalch.sacajawea.listening
 
 import java.security.MessageDigest
 

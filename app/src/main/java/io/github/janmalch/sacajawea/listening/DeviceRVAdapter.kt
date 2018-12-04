@@ -1,15 +1,17 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.listening
 
-import android.net.wifi.p2p.WifiP2pDevice
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
-import io.github.janmalch.sacajawea.service.Translator
+import io.github.janmalch.sacajawea.R
+import io.github.janmalch.sacajawea.inflate
 import kotlinx.android.synthetic.main.rv_device.view.*
 
-class DeviceRVAdapter(private val items: List<Translator>, private val listener: (Translator) -> Unit) : RecyclerView.Adapter<DeviceRVAdapter.ViewHolder>() {
+class DeviceRVAdapter(private val items: List<Translator>, private val listener: (Translator) -> Unit) :
+    RecyclerView.Adapter<DeviceRVAdapter.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(parent.inflate(R.layout.rv_device))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(parent.inflate(R.layout.rv_device))
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(items[position], listener)
 

@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea.service
+package io.github.janmalch.sacajawea.listening
 
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
@@ -7,8 +7,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE
 import android.util.Log
-import java.io.Serializable
-import java.net.Socket
 
 class ListenerService(
     private val mManager: WifiP2pManager,
@@ -38,7 +36,12 @@ class ListenerService(
         val txtListener = WifiP2pManager.DnsSdTxtRecordListener { fullDomain, record, device ->
             Log.i("ListenerService::2", "DnsSdTxtRecord available -$record -$fullDomain")
 
-            translators[device.deviceAddress] = Translator(record["name"], record["language"], device, record["port"]!!.toInt())
+            translators[device.deviceAddress] = Translator(
+                record["name"],
+                record["language"],
+                device,
+                record["port"]!!.toInt()
+            )
         }
 
         val servListener = WifiP2pManager.DnsSdServiceResponseListener { instanceName, registrationType, device ->

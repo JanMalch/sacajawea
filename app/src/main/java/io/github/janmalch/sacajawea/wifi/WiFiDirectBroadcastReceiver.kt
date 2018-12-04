@@ -1,10 +1,9 @@
-package io.github.janmalch.sacajawea.receivers
+package io.github.janmalch.sacajawea.wifi
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.p2p.WifiP2pManager
-import io.github.janmalch.sacajawea.WiFiBroadcastCallbacks
 
 class WiFiDirectBroadcastReceiver(
     private val mManager: WifiP2pManager,

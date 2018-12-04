@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".TranslatingActivity"
+        tools:context=".translating.TranslatingActivity"
 
         android:padding="24dp">
 
@@ -19,22 +19,25 @@
             android:id="@+id/tv_translating_language"
             android:textStyle="normal"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp"
             android:gravity="center"/>
 
     <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@color/divider"/>
+            android:background="@color/divider"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
 
-    <!--<TextView
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_translating_clients"/>
+
+    <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textColor="#fff"
-            android:textStyle="bold"
-            android:id="@+id/tv_translating_sound"
-            android:textSize="22sp"/>-->
+            android:id="@+id/tv_translating_sound"/>
 
     <View
             android:layout_width="match_parent"

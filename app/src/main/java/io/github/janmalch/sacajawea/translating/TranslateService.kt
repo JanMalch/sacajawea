@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea.service
+package io.github.janmalch.sacajawea.translating
 
 import android.net.wifi.p2p.WifiP2pManager
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo

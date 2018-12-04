@@ -23,13 +23,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".TranslateActivity">
+        <activity android:name=".translating.TranslateActivity">
         </activity>
-        <activity android:name=".ListenActivity">
+        <activity android:name=".listening.ListenActivity">
         </activity>
-        <activity android:name=".TranslatingActivity">
+        <activity android:name=".translating.TranslatingActivity">
         </activity>
-        <activity android:name=".ListeningActivity">
+        <activity android:name=".listening.ListeningActivity">
         </activity>
     </application>
 

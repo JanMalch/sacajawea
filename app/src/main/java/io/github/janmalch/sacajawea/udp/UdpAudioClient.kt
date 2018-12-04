@@ -46,8 +46,8 @@ class UdpAudioClient (private val host: String, private val port: Int, private v
         socketx.use {
             it.bind(null)
             it.connect(InetSocketAddress(host, port), 500)
-            // it.getOutputStream().write("Jan".toByteArray())
-            // it.getOutputStream().flush()
+            it.getOutputStream().write("Jan\n".toByteArray())
+            it.getOutputStream().flush()
         }
 
         publishProgress(2)

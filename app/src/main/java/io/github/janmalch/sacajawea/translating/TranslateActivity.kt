@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.translating
 
 import android.content.Context
 import android.content.Intent
@@ -9,6 +9,10 @@ import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_translate.*
 import android.net.ConnectivityManager
 import android.view.View
+import io.github.janmalch.sacajawea.R
+import io.github.janmalch.sacajawea.afterTextChanged
+import io.github.janmalch.sacajawea.bindToPreference
+import io.github.janmalch.sacajawea.formatAsIpAddress
 
 
 class TranslateActivity : AppCompatActivity() {
@@ -25,8 +29,8 @@ class TranslateActivity : AppCompatActivity() {
             )
         )
 
-        name.bindToPreference( R.string.pref_name)
-        languages_list.bindToPreference( R.string.pref_translate_language)
+        name.bindToPreference(R.string.pref_name)
+        languages_list.bindToPreference(R.string.pref_translate_language)
 
         name.afterTextChanged { updatePreview() }
         languages_list.afterTextChanged { updatePreview() }

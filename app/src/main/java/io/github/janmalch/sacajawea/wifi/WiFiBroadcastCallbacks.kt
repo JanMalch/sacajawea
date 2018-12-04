@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.wifi
 
 import android.net.wifi.p2p.WifiP2pManager
 

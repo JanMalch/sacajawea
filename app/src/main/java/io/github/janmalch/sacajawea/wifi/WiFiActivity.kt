@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.wifi
 
 import android.content.Context
 import android.content.IntentFilter
@@ -7,7 +7,6 @@ import android.net.wifi.p2p.WifiP2pInfo
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import io.github.janmalch.sacajawea.receivers.WiFiDirectBroadcastReceiver
 
 abstract class WiFiActivity : AppCompatActivity(), WiFiBroadcastCallbacks {
     protected lateinit var mChannel: WifiP2pManager.Channel

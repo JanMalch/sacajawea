@@ -2,32 +2,32 @@ package io.github.janmalch.sacajawea.observable
 
 import java.util.*
 
-interface IObserver<T> {
-    fun update(t: T)
+interface IObservable<T> {
+    fun subscribe(observer: (T) -> Unit)
+    fun completed(handler: () -> Unit)
 }
 
-open class Observable<T> {
-
+open class Subject<T> : IObservable<T> {
     private val observers = ArrayList<(T) -> Unit>()
     private val completions = ArrayList<() -> Unit>()
 
-    fun subscribe(observer: (T) -> Unit) {
+    override fun subscribe(observer: (T) -> Unit) {
         observers.add(observer)
     }
 
-    fun completed(handler: () -> Unit) {
+    override fun completed(handler: () -> Unit) {
         completions.add(handler)
     }
 
-    fun unsubscribe(observer: (T) -> Unit) {
-        observers.remove(observer)
-    }
-
-    fun complete() {
-        for (fn in completions) {
-            fn()
+    open fun complete() {
+        for (completion in completions) {
+            completion()
         }
         observers.clear()
+    }
+
+    fun toObservable(): IObservable<T> {
+        return Observable(this)
     }
 
     fun next(t: T) {
@@ -37,26 +37,12 @@ open class Observable<T> {
     }
 }
 
-/*
-class Observable<T> {
-
-    private val observers = ArrayList<IObserver<T>>()
-
-    fun subscribe(observer: IObserver<T>) {
-        observers.add(observer)
+class Observable<T>(private val source: Subject<T>) : IObservable<T> {
+    override fun subscribe(observer: (T) -> Unit) {
+        source.subscribe(observer)
     }
 
-    fun unsubscribe(observer: IObserver<T>) {
-        observers.remove(observer)
+    override fun completed(handler: () -> Unit) {
+        source.completed(handler)
     }
-
-    fun complete() {
-        observers.clear()
-    }
-
-    fun next(t: T) {
-        for (observer in observers) {
-            observer.update(t)
-        }
-    }
-}*/
+}

@@ -1,15 +1,13 @@
-package io.github.janmalch.sacajawea
+package io.github.janmalch.sacajawea.listening
 
 import android.content.Intent
-import android.net.wifi.p2p.WifiP2pDeviceList
-import android.net.wifi.p2p.WifiP2pInfo
 import android.os.Bundle
 import android.os.Handler
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
-import io.github.janmalch.sacajawea.service.ListenerService
-import io.github.janmalch.sacajawea.service.Translator
+import io.github.janmalch.sacajawea.*
+import io.github.janmalch.sacajawea.wifi.WiFiActivity
 import kotlinx.android.synthetic.main.activity_listen.*
 
 
@@ -47,12 +45,17 @@ class ListenActivity : WiFiActivity() {
             R.color.google_yellow,
             android.R.color.holo_red_light
         )
+    }
 
+    override fun onResume() {
+        super.onResume()
         listen_swipe_container.post(::startDiscovery)
     }
 
     private fun startDiscovery() {
         listen_swipe_container.isRefreshing = true
+        deviceList.clear()
+        listen_recycler.adapter?.notifyDataSetChanged()
         timeout = Handler().apply {
             postDelayed({
                 listen_swipe_container.isRefreshing = false

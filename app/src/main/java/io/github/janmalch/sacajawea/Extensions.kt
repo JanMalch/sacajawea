@@ -49,7 +49,7 @@ fun EditText.bindToPreference(
     val sharedPref = activity.getSharedPreferences("io.github.janmalch.sacajawea", mode)
     val currentName = sharedPref.getString(activity.getString(prefKey), default)
 
-    this.text = currentName?.toEditable() // TODO: ? ! ?
+    this.text = (currentName ?: "").toEditable()
 
     this.afterTextChanged {
         with(sharedPref.edit()) {
