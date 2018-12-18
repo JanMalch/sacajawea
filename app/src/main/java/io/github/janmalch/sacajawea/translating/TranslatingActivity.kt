@@ -16,11 +16,14 @@ import io.github.janmalch.sacajawea.getPreferenceString
 import io.github.janmalch.sacajawea.listening.Listener
 import io.github.janmalch.sacajawea.media.AudioStream
 import io.github.janmalch.sacajawea.observable.ServerSubject
-import io.github.janmalch.sacajawea.udp.AudioSocket
+import io.github.janmalch.sacajawea.net.AudioBroadcast
+import io.github.janmalch.sacajawea.net.AudioSocket
 import io.github.janmalch.sacajawea.wifi.WiFiActivity
 import kotlinx.android.synthetic.main.activity_translating.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class TranslatingActivity : WiFiActivity() {
 
@@ -38,6 +41,7 @@ class TranslatingActivity : WiFiActivity() {
 
     private val threads = Executors.newCachedThreadPool()
     private val shutdown = CountDownLatch(1)
+    private val sockets = mutableMapOf<String, AudioSocket>()
 
     // private val volume = VolumeStreamRunnable(shutdown)
 
@@ -45,24 +49,49 @@ class TranslatingActivity : WiFiActivity() {
     private lateinit var server: ServerSubject
     private lateinit var service: TranslateService
 
+    private lateinit var overallRatingHandler: RatingHandler
+    private lateinit var volumeRatingHandler: RatingHandler
+    private lateinit var speedRatingHandler: RatingHandler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_translating)
         stop_translating.setOnClickListener { stopTranslating() }
 
+        overallRatingHandler = object : RatingHandler(this, translating_feedback_overall) {
+            override fun calcProgress(): Int = (averageRating * 25).roundToInt()
+            override fun calcHue(): Float = (averageRating * 25).toFloat()
+        }
+
+        volumeRatingHandler = object : RatingHandler(this, translating_feedback_volume) {
+            override fun calcProgress(): Int = (averageRating * 25).roundToInt() + 50
+            override fun calcHue(): Float = abs(averageRating.toFloat()) * -50 + 100
+        }
+
+        speedRatingHandler = object : RatingHandler(this, translating_feedback_speed) {
+            override fun calcProgress(): Int = (averageRating * 25).roundToInt() + 50
+            override fun calcHue(): Float = abs(averageRating.toFloat()) * -50 + 100
+        }
+
         audioStream = AudioStream(shutdown)
         threads.submit(audioStream)
 
-        // volume.progress.subscribe { tv_translating_sound.text = it }
-        // threads.submit(volume)
-
         server = ServerSubject()
-        server.subscribe {
-            val client = AudioSocket(it.client.inetAddress, server.port, audioStream)
-            listeners[it.listener.id] = it.listener
+        server.overallRatings.subscribe(overallRatingHandler::addRating)
+        server.speedRatings.subscribe(speedRatingHandler::addRating)
+        server.volumeRatings.subscribe(volumeRatingHandler::addRating)
+
+        server.goodbyes.subscribe {
+            sockets[it]?.shutdown()
+            listeners.remove(it)
             requestGroupInfo()
-            threads.submit(client)
         }
+
+        server.handshakes.subscribe {
+            listeners[it.listener.ip] = it.listener
+            requestGroupInfo()
+        }
+        threads.submit(AudioBroadcast(server.port, audioStream))
         threads.submit(server)
 
         service = TranslateService(
@@ -88,10 +117,7 @@ class TranslatingActivity : WiFiActivity() {
     }
 
     private fun setupRecording() {
-        // volume.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
-        // TODO: AudioStream into UdpServer
-        // Log.i(TAG, "setup recording ...")
-        // recorder.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+        // TODO: move code here (due to permissions, ...)
     }
 
     override fun onRequestPermissionsResult(
@@ -134,9 +160,8 @@ class TranslatingActivity : WiFiActivity() {
                 Log.i(TAG, "onGroupInfoAvailable :: group" /* = $it*/)
                 Log.i(TAG, "  |__ :: isGroupOwner = ${it.isGroupOwner}")
                 Log.i(TAG, "  |__ :: Clients = ${it.clientList.size}")
-                updateStatus(-1, it.clientList.size)
+                updateStatus(-1, it.clientList.size, listeners.size)
             }
-
         }
     }
 
@@ -208,7 +233,7 @@ class TranslatingActivity : WiFiActivity() {
     }*/
 
 
-    private fun updateStatus(error: Int, currentListeners: Int = 0) {
+    private fun updateStatus(error: Int, inWifiGroup: Int = 0, currentListeners: Int = 0) {
         if (error < 0 && server.running) {
             tv_translating_language.text = getString(
                 R.string.translating_status,
@@ -219,7 +244,7 @@ class TranslatingActivity : WiFiActivity() {
             tv_translating_language.text = getString(R.string.service_registration_error)
         }
 
-        tv_translating_clients.text = listeners.values.joinToString("\n", "- ")
+        tv_translating_clients.text = listeners.values.joinToString("\n")
     }
 
     /** register the BroadcastReceiver with the intent values to be matched  */

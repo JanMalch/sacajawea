@@ -6,7 +6,10 @@ import android.os.Handler
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
-import io.github.janmalch.sacajawea.*
+import android.view.View
+import io.github.janmalch.sacajawea.R
+import io.github.janmalch.sacajawea.Seconds
+import io.github.janmalch.sacajawea.toast
 import io.github.janmalch.sacajawea.wifi.WiFiActivity
 import kotlinx.android.synthetic.main.activity_listen.*
 
@@ -15,12 +18,20 @@ class ListenActivity : WiFiActivity() {
 
     private val deviceList = mutableListOf<Translator>()
     private val listener: ListenerService by lazy {
-        ListenerService(mManager, mChannel) {
+        ListenerService(mManager,
+            mChannel,
+            {
+                timeout?.apply { removeCallbacks(null) }
+                listen_swipe_container.isRefreshing = false
+                listen_empty_rv.visibility = if (deviceList.isEmpty()) View.VISIBLE else View.GONE
+            }
+        ) {
             timeout?.apply { removeCallbacks(null) }
             deviceList.clear()
             deviceList.addAll(it.values)
             listen_recycler.adapter?.notifyDataSetChanged()
             listen_swipe_container.isRefreshing = false
+            listen_empty_rv.visibility = if (deviceList.isEmpty()) View.VISIBLE else View.GONE
         }
     }
 
@@ -33,8 +44,8 @@ class ListenActivity : WiFiActivity() {
         listen_recycler.layoutManager = LinearLayoutManager(this)
         listen_recycler.adapter = DeviceRVAdapter(deviceList) {
             timeout?.apply { removeCallbacks(null) }
-            AppState.activeTranslator = it
             val i = Intent(this, ListeningActivity::class.java)
+            i.putExtra("translator", it)
             startActivity(i)
         }
 
@@ -60,7 +71,7 @@ class ListenActivity : WiFiActivity() {
             postDelayed({
                 listen_swipe_container.isRefreshing = false
                 toast("Operation timed out. No devices found.")
-            }, 30.Seconds)
+            }, 10.Seconds)
         }
         listener.startDiscovery()
     }
@@ -82,6 +93,11 @@ class ListenActivity : WiFiActivity() {
     }*/
 
     // ------------------------------ Activity life cycles etc. ------------------------------
+
+    override fun onBackPressed() {
+        timeout?.apply { removeCallbacks(null) }
+        super.onBackPressed()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.listen_menu, menu)

@@ -3,7 +3,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#e6ffffff">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -21,10 +22,22 @@
                 android:src="@drawable/ic_mic_white_24dp"
                 android:tint="@color/primary"/>
 
-        <TextView
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/rv_device_address"/>
+                android:orientation="vertical">
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rv_language"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary_text"
+                    android:textSize="16sp"/>
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rv_device_address"/>
+        </LinearLayout>
     </LinearLayout>
 
     <View

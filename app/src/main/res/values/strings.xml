@@ -19,8 +19,6 @@
     <string name="scan_qr_code">Scan QR code</string>
     <string name="service_registration_error">An error occurred during initial setup. Please wait or retry later.</string>
 
-
-
     <string name="mandarin">Mandarin</string>
     <string name="spanish">Spanish</string>
     <string name="english">English</string>
@@ -87,5 +85,6 @@
     </string-array>
     <string name="title_activity_listening">ListeningActivity</string>
     <string name="setting_up">Setting up, please wait (%1$d/6) …</string>
+    <string name="rate_experience">Please rate your experience.</string>
 </resources>
 

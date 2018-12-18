@@ -19,8 +19,8 @@ class DeviceRVAdapter(private val items: List<Translator>, private val listener:
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(item: Translator, listener: (Translator) -> Unit) = with(itemView) {
-            val txt = item.name + " >> " + item.language + "\n:" + item.port
-            rv_device_address.text = txt
+            rv_language.text = item.language
+            rv_device_address.text = "Translator: ${item.name}"
             setOnClickListener { listener(item) }
         }
     }

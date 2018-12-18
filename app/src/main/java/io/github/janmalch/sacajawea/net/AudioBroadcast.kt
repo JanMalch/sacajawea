@@ -1,4 +1,4 @@
-package io.github.janmalch.sacajawea.udp
+package io.github.janmalch.sacajawea.net
 
 import io.github.janmalch.sacajawea.media.AudioPayload
 import io.github.janmalch.sacajawea.observable.IObservable
@@ -8,32 +8,26 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.concurrent.CountDownLatch
 
-class AudioSocket(
-    private val address: InetAddress,
+class AudioBroadcast(
     private val port: Int,
     private val audioStream: IObservable<AudioPayload>
 ) : Runnable, Closeable {
 
-    private var socket: DatagramSocket? = null
+    private val socket = DatagramSocket()
 
     override fun run() {
         val shutdown = CountDownLatch(1)
-        socket = DatagramSocket()
-
         audioStream.subscribe {
-            socket?.send(DatagramPacket(it.buffer, it.length, address, port))
-            // Thread.sleep(AudioConfig.SAMPLE_INTERVAL.toLong(), 0)
+            val packet = DatagramPacket(it.buffer, it.length, InetAddress.getByName("192.168.49.255"), port)
+            socket.takeIf { s -> !s.isClosed }?.send(packet)
         }
-
         audioStream.completed { shutdown.countDown() }
         shutdown.await()
         close()
     }
 
     override fun close() {
-        socket?.also {
-            it.disconnect()
-            it.close()
-        }
+        socket.disconnect()
+        socket.close()
     }
 }

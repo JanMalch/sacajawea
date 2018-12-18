@@ -2,7 +2,10 @@ package io.github.janmalch.sacajawea.listening
 
 import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
-import android.net.wifi.p2p.nsd.*
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest
+import android.net.wifi.p2p.nsd.WifiP2pServiceInfo
+import android.net.wifi.p2p.nsd.WifiP2pServiceRequest
+import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceRequest
 import android.os.Parcel
 import android.os.Parcelable
 import android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE
@@ -11,11 +14,9 @@ import android.util.Log
 class ListenerService(
     private val mManager: WifiP2pManager,
     private val mChannel: WifiP2pManager.Channel,
-    // private val onDiscover: (device: WifiP2pDevice) -> Unit
+    private val onDiscoveryEnd: () -> Unit,
     private val onDiscover: (translators: Map<String, Translator>) -> Unit
 ) {
-
-
     val translators = mutableMapOf<String, Translator>()
 
     fun startDiscovery() {
@@ -59,10 +60,11 @@ class ListenerService(
 
         mManager.setDnsSdResponseListeners(mChannel, servListener, txtListener)
 
-        val upnpListener = WifiP2pManager.UpnpServiceResponseListener {
-            uniqueServiceNames, srcDevice ->
-            Log.d("ListenerService::4", "uniqueServiceNames:" + uniqueServiceNames.toString() + ", WifiP2pDevice: "
-                    + srcDevice.toString())
+        val upnpListener = WifiP2pManager.UpnpServiceResponseListener { uniqueServiceNames, srcDevice ->
+            Log.d(
+                "ListenerService::4", "uniqueServiceNames:" + uniqueServiceNames.toString() + ", WifiP2pDevice: "
+                        + srcDevice.toString()
+            )
         }
 
         mManager.setUpnpServiceResponseListener(mChannel, upnpListener)
@@ -73,6 +75,7 @@ class ListenerService(
         mManager.discoverServices(mChannel, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
                 Log.d("ListenerService::7", "discoverServices.onSuccess()")
+                onDiscoveryEnd()
             }
 
             override fun onFailure(reason: Int) {
@@ -88,34 +91,46 @@ class ListenerService(
     private fun addServiceRequest(request: WifiP2pServiceRequest) {
         mManager.addServiceRequest(mChannel, request, object : WifiP2pManager.ActionListener {
             override fun onSuccess() {
-                Log.d("ListenerService::5", "addServiceRequest.onSuccess() for requests of type: " + request.javaClass.simpleName)
+                Log.d(
+                    "ListenerService::5",
+                    "addServiceRequest.onSuccess() for requests of type: " + request.javaClass.simpleName
+                )
             }
 
             override fun onFailure(reason: Int) {
-                Log.d("ListenerService::6", "addServiceRequest.onFailure: " + reason + ", for requests of type: "
-                        + request.javaClass.simpleName
+                Log.d(
+                    "ListenerService::6", "addServiceRequest.onFailure: " + reason + ", for requests of type: "
+                            + request.javaClass.simpleName
                 )
             }
         })
     }
 }
 
-data class Translator(var name: String?, var language: String?, val device: WifiP2pDevice, val port: Int): Parcelable {
+data class Translator(
+    var name: String?,
+    var language: String?,
+    val device: WifiP2pDevice,
+    val port: Int,
+    var hostAddress: String? = null
+) : Parcelable {
 
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),
         parcel.readParcelable(WifiP2pDevice::class.java.classLoader),
-        parcel.readInt()
+        parcel.readInt(),
+        parcel.readString()
     )
 
     override fun writeToParcel(dest: Parcel?, flags: Int) {
         dest?.also {
             it.writeString(name)
-            it.writeInt(port)
+            it.writeString(language)
             it.writeParcelable(device, PARCELABLE_WRITE_RETURN_VALUE)
+            it.writeInt(port)
+            it.writeString(hostAddress)
         }
-
     }
 
     override fun describeContents(): Int {
