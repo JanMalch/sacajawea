@@ -9,6 +9,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.concurrent.CountDownLatch
 
+// TODO: AudioSocket vs AudioBroadcast?
 class AudioSocket(
     private val address: InetAddress,
     private val port: Int,
