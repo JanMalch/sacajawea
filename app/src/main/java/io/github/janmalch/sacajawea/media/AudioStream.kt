@@ -11,7 +11,19 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 import kotlin.concurrent.fixedRateTimer
 
-class AudioStream(private val shutdown: CountDownLatch) : IObservable<AudioPayload>, Runnable, Closeable {
+// TODO: IObservable by delegation?
+
+class AudioStream
+private constructor(
+    private val shutdown: CountDownLatch,
+    private val subject: Subject<AudioPayload>
+) :
+    IObservable<AudioPayload> by subject,
+    Runnable,
+    Closeable {
+
+    constructor(shutdown: CountDownLatch): this(shutdown, Subject())
+
 
     init {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_AUDIO)
@@ -20,7 +32,6 @@ class AudioStream(private val shutdown: CountDownLatch) : IObservable<AudioPaylo
     private val buf = ByteArray(AudioConfig.BUF_SIZE)
 
     private var timer: Timer? = null
-    private val subject = Subject<Int>()
 
     private val audioRecorder = AudioRecord(
         MediaRecorder.AudioSource.MIC, AudioConfig.SAMPLE_RATE,
@@ -38,8 +49,11 @@ class AudioStream(private val shutdown: CountDownLatch) : IObservable<AudioPaylo
             throw IllegalStateException("Audio Recorder not initialized.")
         }
 
-        timer = fixedRateTimer("AudioStream Timer", period = AudioConfig.SAMPLE_INTERVAL.toLong()) {
-            subject.next(audioRecorder.read(buf, 0, AudioConfig.BUF_SIZE))
+        timer = fixedRateTimer("AudioStream Timer",
+            period = AudioConfig.SAMPLE_INTERVAL.toLong()
+        ) {
+            val length = audioRecorder.read(buf, 0, AudioConfig.BUF_SIZE)
+            subject.next(AudioPayload(buffer = buf, length = length))
         }
 
         shutdown.await()
@@ -53,13 +67,7 @@ class AudioStream(private val shutdown: CountDownLatch) : IObservable<AudioPaylo
         audioRecorder.release()
     }
 
-    override fun subscribe(observer: (AudioPayload) -> Unit) {
-        subject.subscribe { observer(AudioPayload(buffer = buf, length = it)) }
-    }
-
-    override fun completed(handler: () -> Unit) {
-        subject.completed(handler)
-    }
 }
 
 data class AudioPayload(val buffer: ByteArray, val length: Int)
+
